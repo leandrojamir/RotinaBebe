@@ -1,75 +1,92 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rotina da Bebê</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rotina da Princesa 👑</title>
   <style>
     body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 1rem;
-      background-color: #f0f8ff;
+      font-family: Arial, sans-serif;
+      background-color: #fff0f5;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
     }
-    h1, h2, h3 {
+    h1 {
       text-align: center;
+      color: #c71585;
     }
-    form, #resultado {
-      background-color: #ffffff;
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      margin-bottom: 2rem;
-    }
-    label {
+    label, textarea, input, button {
       display: block;
-      margin-bottom: 1rem;
-    }
-    input[type="text"], input[type="date"], textarea {
       width: 100%;
-      padding: 0.5rem;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
+      margin-bottom: 12px;
+      font-size: 16px;
     }
     textarea {
-      min-height: 60px;
+      height: 60px;
+      resize: vertical;
     }
     button {
-      padding: 0.5rem 1rem;
-      margin: 0.3rem;
-      border: none;
-      border-radius: 5px;
-      background-color: #4CAF50;
+      background-color: #c71585;
       color: white;
-      font-weight: bold;
+      border: none;
+      padding: 10px;
       cursor: pointer;
+      border-radius: 6px;
     }
     button:hover {
-      background-color: #45a049;
+      background-color: #9b136c;
     }
-    #btns {
-      text-align: center;
-      margin-top: 1rem;
-    }
-    .registro span {
-      display: block;
-      margin-bottom: 0.5rem;
-    }
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 1.5rem;
-      }
-      button {
-        width: 100%;
-        margin: 0.5rem 0;
-      }
+    #resultado {
+      margin-top: 20px;
+      padding: 12px;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 0 5px #ccc;
     }
   </style>
+</head>
+<body>
+
+  <h1>Rotina da Princesa 👶💖</h1>
+
+  <label for="data">📅 Data:</label>
+  <input type="date" id="data" required />
+
+  <label for="sono">🛏 Sono:</label>
+  <textarea id="sono"></textarea>
+
+  <label for="urina">💧 Urina:</label>
+  <textarea id="urina"></textarea>
+
+  <label for="fezes">💩 Fezes:</label>
+  <textarea id="fezes"></textarea>
+
+  <label for="mamada">🍼 Mamada:</label>
+  <textarea id="mamada"></textarea>
+
+  <label for="vitaminaD">🌞 Vitamina D:</label>
+  <textarea id="vitaminaD"></textarea>
+
+  <label for="estimulacao">🎯 Estimulação:</label>
+  <textarea id="estimulacao"></textarea>
+
+  <button id="salvar">💾 Salvar dados</button>
+
+  <hr/>
+
+  <label for="dataConsulta">🔍 Selecionar data:</label>
+  <input type="date" id="dataConsulta" />
+  <button id="carregarBtn">📅 Carregar dados do dia</button>
+
+  <div id="resultado"></div>
+
+  <button id="gerarPdf">📄 Gerar PDF</button>
+  <button id="compartilhar">📤 Compartilhar no WhatsApp</button>
+
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
-    import html2pdf from "https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCjy4XjLQxDx0IyA5MNE6JuNDEDzQR3jeU",
@@ -77,141 +94,101 @@
       projectId: "rotinaprincesa",
       storageBucket: "rotinaprincesa.firebasestorage.app",
       messagingSenderId: "988323884361",
-      appId: "1:988323884361:web:892a1681bdddb553273e98",
-      databaseURL: "https://rotinaprincesa-default-rtdb.firebaseio.com/"
+      appId: "1:988323884361:web:892a1681bdddb553273e98"
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    const db = getDatabase();
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const form = document.getElementById("rotinaForm");
-      const resultado = document.getElementById("resultado");
-      const dataConsultaInput = document.getElementById("dataConsulta");
-      const carregarBtn = document.getElementById("carregarBtn");
-      const pdfBtn = document.getElementById("pdfBtn");
-      const whatsappBtn = document.getElementById("whatsappBtn");
+    const salvarBtn = document.getElementById("salvar");
+    const dataInput = document.getElementById("data");
+    const sono = document.getElementById("sono");
+    const urina = document.getElementById("urina");
+    const fezes = document.getElementById("fezes");
+    const mamada = document.getElementById("mamada");
+    const vitaminaD = document.getElementById("vitaminaD");
+    const estimulacao = document.getElementById("estimulacao");
+    const resultado = document.getElementById("resultado");
+    const carregarBtn = document.getElementById("carregarBtn");
+    const dataConsultaInput = document.getElementById("dataConsulta");
+    const gerarPdfBtn = document.getElementById("gerarPdf");
+    const compartilharBtn = document.getElementById("compartilhar");
 
-      let dadosDia = "";
+    salvarBtn.addEventListener("click", async () => {
+      const dataSelecionada = dataInput.value;
+      if (!/\d{4}-\d{2}-\d{2}/.test(dataSelecionada)) {
+        alert("Selecione uma data válida.");
+        return;
+      }
 
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
+      const diaRef = ref(db, "rotina/" + dataSelecionada);
+      const snapshot = await get(diaRef);
+      const dadosExistente = snapshot.exists() ? snapshot.val() : {};
 
-        const data = form.data.value;
-        if (!data) {
-          alert("Por favor, preencha a data.");
-          return;
-        }
+      const novoDados = {
+        sono: concat(dadosExistente.sono, sono.value),
+        urina: concat(dadosExistente.urina, urina.value),
+        fezes: concat(dadosExistente.fezes, fezes.value),
+        mamada: concat(dadosExistente.mamada, mamada.value),
+        vitaminaD: concat(dadosExistente.vitaminaD, vitaminaD.value),
+        estimulacao: concat(dadosExistente.estimulacao, estimulacao.value)
+      };
 
-        const dataRef = ref(db, 'rotina/' + data);
-        const snapshot = await get(dataRef);
+      await set(diaRef, novoDados);
+      alert("Dados salvos com sucesso!");
+      sono.value = urina.value = fezes.value = mamada.value = vitaminaD.value = estimulacao.value = "";
+    });
 
-        const novo = {
-          sono: form.sono.value.trim(),
-          urina: form.urina.value.trim(),
-          fezes: form.fezes.value.trim(),
-          mamada: form.mamada.value.trim(),
-          estimulo: form.estimulo.value.trim(),
-          vitamina: form.vitamina.value.trim(),
-          timestamp: new Date().toISOString()
-        };
+    function concat(antigo, novo) {
+      if (!novo.trim()) return antigo || "";
+      if (!antigo) return novo.trim();
+      return antigo.trim() + "; " + novo.trim();
+    }
 
-        let atual = {};
-        if (snapshot.exists()) {
-          atual = snapshot.val();
-        }
+    carregarBtn.addEventListener("click", async () => {
+      const dataSelecionada = dataConsultaInput.value;
+      if (!/\d{4}-\d{2}-\d{2}/.test(dataSelecionada)) {
+        alert("Selecione uma data válida.");
+        return;
+      }
 
-        const juntar = (campo) => {
-          return [atual[campo] || "", novo[campo] || ""].filter(Boolean).join("; ");
-        };
+      resultado.innerHTML = "<p>🔄 Carregando...</p>";
 
-        const dadosAtualizados = {
-          sono: juntar("sono"),
-          urina: juntar("urina"),
-          fezes: juntar("fezes"),
-          mamada: juntar("mamada"),
-          estimulo: juntar("estimulo"),
-          vitamina: juntar("vitamina"),
-          atualizado_em: novo.timestamp
-        };
-
-        await set(dataRef, dadosAtualizados);
-
-        alert("Dados atualizados com sucesso!");
-        form.reset();
-      });
-
-      carregarBtn.addEventListener("click", async () => {
-        const dataSelecionada = dataConsultaInput.value;
-        if (!dataSelecionada) {
-          alert("Por favor, selecione uma data para carregar.");
-          return;
-        }
-
-        const diaRef = ref(db, 'rotina/' + dataSelecionada);
+      try {
+        const diaRef = ref(db, "rotina/" + dataSelecionada);
         const snapshot = await get(diaRef);
-
         if (snapshot.exists()) {
-          const item = snapshot.val();
-          const formatado = `🛌 Sonos:\n${item.sono.replace(/; /g, '\n')}\n\n💧 Urinas:\n${item.urina.replace(/; /g, '\n')}\n\n💩 Fezes:\n${item.fezes.replace(/; /g, '\n')}\n\n🍼 Mamadas:\n${item.mamada.replace(/; /g, '\n')}\n\n🎯 Estimulação:\n${item.estimulo.replace(/; /g, '\n')}\n\n🌞 Vitamina D: ${item.vitamina || '-'}\n\n🕒 Última atualização: ${new Date(item.atualizado_em).toLocaleString()}`;
-
-          dadosDia = formatado;
-
-          resultado.innerHTML = `<h3>Dados de ${dataSelecionada}</h3>`;
-          resultado.innerHTML += `
-            <div class="registro" id="conteudoPDF">
-              <span>🛌 <b>Sonos:</b><br>${item.sono.replace(/; /g, '<br>')}</span>
-              <span>💧 <b>Urinas:</b><br>${item.urina.replace(/; /g, '<br>')}</span>
-              <span>💩 <b>Fezes:</b><br>${item.fezes.replace(/; /g, '<br>')}</span>
-              <span>🍼 <b>Mamadas:</b><br>${item.mamada.replace(/; /g, '<br>')}</span>
-              <span>🎯 <b>Estimulação:</b><br>${item.estimulo.replace(/; /g, '<br>')}</span>
-              <span>🌞 <b>Vitamina D:</b> ${item.vitamina || '-'}</span><br>
-              <small>🕒 Última atualização: ${new Date(item.atualizado_em).toLocaleString()}</small>
-            </div>
-          `;
+          const dados = snapshot.val();
+          let html = `<h3>Dados de ${dataSelecionada}</h3>`;
+          html += `<p><strong>🛏 Sono:</strong> ${dados.sono || "Sem dados"}</p>`;
+          html += `<p><strong>💧 Urina:</strong> ${dados.urina || "Sem dados"}</p>`;
+          html += `<p><strong>💩 Fezes:</strong> ${dados.fezes || "Sem dados"}</p>`;
+          html += `<p><strong>🍼 Mamada:</strong> ${dados.mamada || "Sem dados"}</p>`;
+          html += `<p><strong>🌞 Vitamina D:</strong> ${dados.vitaminaD || "Sem dados"}</p>`;
+          html += `<p><strong>🎯 Estimulação:</strong> ${dados.estimulacao || "Sem dados"}</p>`;
+          resultado.innerHTML = html;
         } else {
-          resultado.innerHTML = `<p>Nenhum dado encontrado para ${dataSelecionada}.</p>`;
-          dadosDia = "";
+          resultado.innerHTML = `<p>⚠️ Nenhum dado encontrado para ${dataSelecionada}</p>`;
         }
-      });
+      } catch (e) {
+        resultado.innerHTML = `<p>Erro ao carregar dados.</p>`;
+      }
+    });
 
-      pdfBtn.addEventListener("click", () => {
-        const elemento = document.getElementById("conteudoPDF");
-        if (!elemento) return alert("Nenhum dado carregado.");
+    gerarPdfBtn.addEventListener("click", () => {
+      const texto = resultado.innerText;
+      const blob = new Blob([texto], { type: "application/pdf" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "rotina.pdf";
+      link.click();
+    });
 
-        html2pdf().from(elemento).save("rotina-bebe.pdf");
-      });
-
-      whatsappBtn.addEventListener("click", () => {
-        if (!dadosDia) return alert("Carregue uma data primeiro.");
-        const url = `https://wa.me/?text=${encodeURIComponent(dadosDia)}`;
-        window.open(url, '_blank');
-      });
+    compartilharBtn.addEventListener("click", () => {
+      const texto = resultado.innerText;
+      const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+      window.open(url, "_blank");
     });
   </script>
-</head>
-<body>
-  <h1>Rotina da Bebê</h1>
-
-  <form id="rotinaForm">
-    <label>Data (obrigatório): <input type="date" name="data" required /></label>
-    <label>🛌 Sonos: <textarea name="sono"></textarea></label>
-    <label>💧 Urinas: <textarea name="urina"></textarea></label>
-    <label>💩 Fezes: <textarea name="fezes"></textarea></label>
-    <label>🍼 Mamadas: <textarea name="mamada"></textarea></label>
-    <label>🎯 Estimulação: <textarea name="estimulo"></textarea></label>
-    <label>🌞 Vitamina D: <input type="text" name="vitamina" /></label>
-    <button type="submit">Salvar</button>
-  </form>
-
-  <h2>Consultar Dados por Data</h2>
-  <label>Escolha a data: <input type="date" id="dataConsulta" /></label>
-  <div id="btns">
-    <button id="carregarBtn">📅 Carregar Dados</button>
-    <button id="pdfBtn">📄 Gerar PDF</button>
-    <button id="whatsappBtn">📤 WhatsApp</button>
-  </div>
-
-  <div id="resultado"></div>
 </body>
 </html>
