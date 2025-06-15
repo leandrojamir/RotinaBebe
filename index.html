@@ -16,7 +16,7 @@
       text-align: center;
       color: #c71585;
     }
-    label, textarea, input, button {
+    label, textarea, input, button, select {
       display: block;
       width: 100%;
       margin-bottom: 12px;
@@ -44,6 +44,15 @@
       border-radius: 6px;
       box-shadow: 0 0 5px #ccc;
     }
+    .sono-container {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .sono-container select, .sono-container input {
+      flex: 1;
+    }
   </style>
 </head>
 <body>
@@ -53,7 +62,15 @@
   <label for="data">📅 Data:</label>
   <input type="date" id="data" required />
 
-  <label for="sono">🛏 Sono:</label>
+  <label>🛏 Sono:</label>
+  <div class="sono-container">
+    <select id="tipoSono">
+      <option value="dormiu">Dormiu</option>
+      <option value="acordou">Acordou</option>
+    </select>
+    <input type="time" id="horaSono" />
+    <button type="button" id="adicionarSono">➕</button>
+  </div>
   <textarea id="sono"></textarea>
 
   <label for="urina">💧 Urina:</label>
@@ -102,6 +119,9 @@
 
     const salvarBtn = document.getElementById("salvar");
     const dataInput = document.getElementById("data");
+    const tipoSono = document.getElementById("tipoSono");
+    const horaSono = document.getElementById("horaSono");
+    const adicionarSono = document.getElementById("adicionarSono");
     const sono = document.getElementById("sono");
     const urina = document.getElementById("urina");
     const fezes = document.getElementById("fezes");
@@ -113,6 +133,16 @@
     const dataConsultaInput = document.getElementById("dataConsulta");
     const gerarPdfBtn = document.getElementById("gerarPdf");
     const compartilharBtn = document.getElementById("compartilhar");
+
+    adicionarSono.addEventListener("click", () => {
+      const tipo = tipoSono.value;
+      const hora = horaSono.value;
+      if (hora) {
+        const entrada = `${tipo} ${hora}`;
+        sono.value = sono.value ? `${sono.value}; ${entrada}` : entrada;
+        horaSono.value = "";
+      }
+    });
 
     salvarBtn.addEventListener("click", async () => {
       const dataSelecionada = dataInput.value;
