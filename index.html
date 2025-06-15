@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rotina do Bebê (Firebase)</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 700px; margin: auto; background: #f0f8ff; }
+    h1 { text-align: center; }
+    label { font-weight: bold; margin-top: 10px; display: block; }
+    textarea, input { width: 100%; padding: 8px; margin-top: 5px; }
+    button { margin-top: 10px; padding: 10px 15px; font-weight: bold; cursor: pointer; }
+    .saved { margin-top: 10px; color: green; }
+    #registros { margin-top: 20px; background: #fff; padding: 10px; border-radius: 6px; }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <h1>Registro Diário do Bebê</h1>
+
+  <div id="login">
+    <label>Usuário</label>
+    <input type="text" id="user" placeholder="Usuário">
+    <label>Senha</label>
+    <input type="password" id="pass" placeholder="Senha">
+    <button onclick="login()">Entrar</button>
+  </div>
+
+  <div id="app" style="display:none">
+    <label for="data">Data</label>
+    <input type="date" id="data" />
+
+    <label for="sono">🛌 Sono</label>
+    <textarea id="sono" rows="3"></textarea>
+
+    <label for="mamada">🍼 Mamada</label>
+    <textarea id="mamada" rows="3"></textarea>
+
+    <label for="urina">💧 Urina</label>
+    <textarea id="urina" rows="2"></textarea>
+
+    <label for="fezes">💩 Fezes</label>
+    <textarea id="fezes" rows="2"></textarea>
+
+    <label for="estimulacao">👶 Estimulação</label>
+    <textarea id="estimulacao" rows="2"></textarea>
+
+    <label for="vitamina">🌞 Vitamina D</label>
+    <input type="text" id="vitamina" placeholder="Ex: 11:20" />
+
+    <button onclick="salvar()">Salvar</button>
+    <button onclick="visualizarRegistros()">📅 Ver Registros</button>
+    <button onclick="calcularTotais()">📊 Calcular Totais</button>
+    <button onclick="exportarParaPDF()">📤 Exportar para PDF</button>
+
+    <p class="saved" id="mensagem"></p>
+    <div id="registros"></div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCjy4XjLQxDx0IyA5MNE6JuNDEDzQR3jeU",
+      authDomain: "rotinaprincesa.firebaseapp.com",
+      databaseURL: "https://rotinaprincesa-default-rtdb.firebaseio.com",
+      projectId: "rotinaprincesa",
+      storageBucket: "rotinaprincesa.firebasestorage.app",
+      messagingSenderId: "988323884361",
+      appId: "1:988323884361:web:892a1681bdddb553273e98"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function login() {
+      const u = document.getElementById("user").value;
+      const p = document.getElementById("pass").value;
+      if (u === "Lavinia" && p === "L@vini@") {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("app").style.display = "block";
+      } else {
+        alert("Usuário ou senha incorretos");
+      }
+    }
+
+    function salvar() {
+      const data = document.getElementById("data").value;
+      const info = {
+        sono: document.getElementById("sono").value,
+        mamada: document.getElementById("mamada").value,
+        urina: document.getElementById("urina").value,
+        fezes: document.getElementById("fezes").value,
+        estimulacao: document.getElementById("estimulacao").value,
+        vitamina: document.getElementById("vitamina").value,
+      };
+      if (!data) return alert("Selecione a data.");
+      db.ref("rotina_bebe/" + data).set(info);
+      document.getElementById("mensagem").textContent = "Dados salvos com sucesso!";
+    }
+
+    function visualizarRegistros() {
+      const div = document.getElementById("registros");
+      div.innerHTML = "<h3>Registros Salvos</h3>";
+      db.ref("rotina_bebe").once("value", snapshot => {
+        const dados = snapshot.val();
+        for (let data in dados) {
+          const d = dados[data];
+          div.innerHTML += `<strong>${data}</strong><br>Sono: ${d.sono}<br>Mamada: ${d.mamada}<br>Urina: ${d.urina}<br>Fezes: ${d.fezes}<br><hr>`;
+        }
+      });
+    }
+
+    function calcularTotais() {
+      const sono = document.getElementById("sono").value;
+      const urina = document.getElementById("urina").value;
+      const fezes = document.getElementById("fezes").value;
+      const totalUrina = urina.split(/\n|;/).filter(e => e.trim()).length;
+      const totalFezes = fezes.split(/\n|;/).filter(e => e.trim()).length;
+      const totalSono = calcularHorasSono(sono);
+      alert(`Totais do dia:\nSono: ${totalSono}\nUrina: ${totalUrina}\nFezes: ${totalFezes}`);
+    }
+
+    function calcularHorasSono(texto) {
+      let totalMinutos = 0;
+      const matches = texto.matchAll(/dormiu ([0-9]{1,2}:[0-9]{2});? acordou ([0-9]{1,2}:[0-9]{2})/g);
+      for (const match of matches) {
+        const [h1, m1] = match[1].split(":").map(Number);
+        const [h2, m2] = match[2].split(":").map(Number);
+        let inicio = h1 * 60 + m1;
+        let fim = h2 * 60 + m2;
+        if (fim < inicio) fim += 24 * 60;
+        totalMinutos += (fim - inicio);
+      }
+      const horas = Math.floor(totalMinutos / 60);
+      const minutos = totalMinutos % 60;
+      return `${horas}h${minutos.toString().padStart(2, '0')}min`;
+    }
+
+    async function exportarParaPDF() {
+      const data = document.getElementById("data").value;
+      const texto = `Data: ${data}\nSono: ${document.getElementById("sono").value}\nMamada: ${document.getElementById("mamada").value}\nUrina: ${document.getElementById("urina").value}\nFezes: ${document.getElementById("fezes").value}\nEstimulação: ${document.getElementById("estimulacao").value}\nVitamina D: ${document.getElementById("vitamina").value}`;
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFontSize(12);
+      doc.text(texto, 10, 10);
+      doc.save(`rotina_bebe_${data}.pdf`);
+      const mensagem = encodeURIComponent(texto);
+      window.open(`https://wa.me/?text=${mensagem}`, '_blank');
+    }
+  </script>
+</body>
+</html>
