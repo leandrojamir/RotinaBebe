@@ -4,9 +4,72 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rotina da Bebê</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 1rem;
+      background-color: #f0f8ff;
+    }
+    h1, h2, h3 {
+      text-align: center;
+    }
+    form, #resultado {
+      background-color: #ffffff;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 1rem;
+    }
+    input[type="text"], input[type="date"], textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    textarea {
+      min-height: 60px;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      margin: 0.3rem;
+      border: none;
+      border-radius: 5px;
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #btns {
+      text-align: center;
+      margin-top: 1rem;
+    }
+    .registro span {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+      button {
+        width: 100%;
+        margin: 0.5rem 0;
+      }
+    }
+  </style>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getDatabase, ref, push, set, get, child, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+    import html2pdf from "https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCjy4XjLQxDx0IyA5MNE6JuNDEDzQR3jeU",
@@ -26,6 +89,10 @@
       const resultado = document.getElementById("resultado");
       const dataConsultaInput = document.getElementById("dataConsulta");
       const carregarBtn = document.getElementById("carregarBtn");
+      const pdfBtn = document.getElementById("pdfBtn");
+      const whatsappBtn = document.getElementById("whatsappBtn");
+
+      let dadosDia = "";
 
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -36,21 +103,41 @@
           return;
         }
 
-        const dados = {
-          sono: form.sono.value,
-          urina: form.urina.value,
-          fezes: form.fezes.value,
-          mamada: form.mamada.value,
-          estimulo: form.estimulo.value,
-          vitamina: form.vitamina.value,
+        const dataRef = ref(db, 'rotina/' + data);
+        const snapshot = await get(dataRef);
+
+        const novo = {
+          sono: form.sono.value.trim(),
+          urina: form.urina.value.trim(),
+          fezes: form.fezes.value.trim(),
+          mamada: form.mamada.value.trim(),
+          estimulo: form.estimulo.value.trim(),
+          vitamina: form.vitamina.value.trim(),
           timestamp: new Date().toISOString()
         };
 
-        const dataRef = ref(db, 'rotina/' + data);
-        const novaEntrada = push(dataRef);
-        await set(novaEntrada, dados);
+        let atual = {};
+        if (snapshot.exists()) {
+          atual = snapshot.val();
+        }
 
-        alert("Dados salvos com sucesso!");
+        const juntar = (campo) => {
+          return [atual[campo] || "", novo[campo] || ""].filter(Boolean).join("; ");
+        };
+
+        const dadosAtualizados = {
+          sono: juntar("sono"),
+          urina: juntar("urina"),
+          fezes: juntar("fezes"),
+          mamada: juntar("mamada"),
+          estimulo: juntar("estimulo"),
+          vitamina: juntar("vitamina"),
+          atualizado_em: novo.timestamp
+        };
+
+        await set(dataRef, dadosAtualizados);
+
+        alert("Dados atualizados com sucesso!");
         form.reset();
       });
 
@@ -65,25 +152,40 @@
         const snapshot = await get(diaRef);
 
         if (snapshot.exists()) {
-          const registros = snapshot.val();
+          const item = snapshot.val();
+          const formatado = `🛌 Sonos:\n${item.sono.replace(/; /g, '\n')}\n\n💧 Urinas:\n${item.urina.replace(/; /g, '\n')}\n\n💩 Fezes:\n${item.fezes.replace(/; /g, '\n')}\n\n🍼 Mamadas:\n${item.mamada.replace(/; /g, '\n')}\n\n🎯 Estimulação:\n${item.estimulo.replace(/; /g, '\n')}\n\n🌞 Vitamina D: ${item.vitamina || '-'}\n\n🕒 Última atualização: ${new Date(item.atualizado_em).toLocaleString()}`;
+
+          dadosDia = formatado;
+
           resultado.innerHTML = `<h3>Dados de ${dataSelecionada}</h3>`;
-          Object.values(registros).forEach((item, index) => {
-            resultado.innerHTML += `
-              <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-                <strong>Entrada ${index + 1}</strong><br>
-                <b>Sonos:</b> ${item.sono || '-'}<br>
-                <b>Urinas:</b> ${item.urina || '-'}<br>
-                <b>Fezes:</b> ${item.fezes || '-'}<br>
-                <b>Mamadas:</b> ${item.mamada || '-'}<br>
-                <b>Estimulação:</b> ${item.estimulo || '-'}<br>
-                <b>Vitamina D:</b> ${item.vitamina || '-'}<br>
-                <small>${new Date(item.timestamp).toLocaleString()}</small>
-              </div>
-            `;
-          });
+          resultado.innerHTML += `
+            <div class="registro" id="conteudoPDF">
+              <span>🛌 <b>Sonos:</b><br>${item.sono.replace(/; /g, '<br>')}</span>
+              <span>💧 <b>Urinas:</b><br>${item.urina.replace(/; /g, '<br>')}</span>
+              <span>💩 <b>Fezes:</b><br>${item.fezes.replace(/; /g, '<br>')}</span>
+              <span>🍼 <b>Mamadas:</b><br>${item.mamada.replace(/; /g, '<br>')}</span>
+              <span>🎯 <b>Estimulação:</b><br>${item.estimulo.replace(/; /g, '<br>')}</span>
+              <span>🌞 <b>Vitamina D:</b> ${item.vitamina || '-'}</span><br>
+              <small>🕒 Última atualização: ${new Date(item.atualizado_em).toLocaleString()}</small>
+            </div>
+          `;
         } else {
           resultado.innerHTML = `<p>Nenhum dado encontrado para ${dataSelecionada}.</p>`;
+          dadosDia = "";
         }
+      });
+
+      pdfBtn.addEventListener("click", () => {
+        const elemento = document.getElementById("conteudoPDF");
+        if (!elemento) return alert("Nenhum dado carregado.");
+
+        html2pdf().from(elemento).save("rotina-bebe.pdf");
+      });
+
+      whatsappBtn.addEventListener("click", () => {
+        if (!dadosDia) return alert("Carregue uma data primeiro.");
+        const url = `https://wa.me/?text=${encodeURIComponent(dadosDia)}`;
+        window.open(url, '_blank');
       });
     });
   </script>
@@ -92,20 +194,23 @@
   <h1>Rotina da Bebê</h1>
 
   <form id="rotinaForm">
-    <label>Data (obrigatório): <input type="date" name="data" required /></label><br />
-    <label>Sonos: <textarea name="sono"></textarea></label><br />
-    <label>Urinas: <textarea name="urina"></textarea></label><br />
-    <label>Fezes: <textarea name="fezes"></textarea></label><br />
-    <label>Mamadas: <textarea name="mamada"></textarea></label><br />
-    <label>Estimulação: <textarea name="estimulo"></textarea></label><br />
-    <label>Vitamina D: <input type="text" name="vitamina" /></label><br />
+    <label>Data (obrigatório): <input type="date" name="data" required /></label>
+    <label>🛌 Sonos: <textarea name="sono"></textarea></label>
+    <label>💧 Urinas: <textarea name="urina"></textarea></label>
+    <label>💩 Fezes: <textarea name="fezes"></textarea></label>
+    <label>🍼 Mamadas: <textarea name="mamada"></textarea></label>
+    <label>🎯 Estimulação: <textarea name="estimulo"></textarea></label>
+    <label>🌞 Vitamina D: <input type="text" name="vitamina" /></label>
     <button type="submit">Salvar</button>
   </form>
 
-  <hr>
   <h2>Consultar Dados por Data</h2>
   <label>Escolha a data: <input type="date" id="dataConsulta" /></label>
-  <button id="carregarBtn">Carregar Dados</button>
+  <div id="btns">
+    <button id="carregarBtn">📅 Carregar Dados</button>
+    <button id="pdfBtn">📄 Gerar PDF</button>
+    <button id="whatsappBtn">📤 WhatsApp</button>
+  </div>
 
   <div id="resultado"></div>
 </body>
