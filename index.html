@@ -44,79 +44,61 @@
       border-radius: 6px;
       box-shadow: 0 0 5px #ccc;
     }
-
-
-
   </style>
 </head>
 <body>
 
   <h1>Rotina da Princesa 👶💖</h1>
 
-  <div id="login">
-    <label for="email">📧 Email:</label>
-    <input type="email" id="email" />
-    <label for="senha">🔒 Senha:</label>
-    <input type="password" id="senha" />
-    <button id="entrar">🔓 Entrar</button>
+  <label for="data">📅 Data:</label>
+  <input type="date" id="data" required />
 
+  <label>🛏 Sono:</label>
+  <select id="sonoOpcao">
+    <option value="">Selecione uma opção</option>
+    <option value="dormiu">Dormiu</option>
+    <option value="acordou">Acordou</option>
+  </select>
+  <textarea id="sono"></textarea>
 
-  </div>
+  <label>💩 Fezes:</label>
+  <select id="fezesOpcao">
+    <option value="">Selecione o tipo</option>
+    <option value="PQ">PQ</option>
+    <option value="MQ">MQ</option>
+    <option value="GQ">GQ</option>
+    <option value="GGQ">GGQ</option>
+  </select>
+  <textarea id="fezes"></textarea>
 
-  <div id="app" style="display:none;">
-    <label for="data">📅 Data:</label>
-    <input type="date" id="data" required />
+  <label for="urina">💧 Urina:</label>
+  <textarea id="urina"></textarea>
 
-    <label>🛏 Sono:</label>
-    <select id="sonoOpcao">
-      <option value="">Selecione uma opção</option>
-      <option value="dormiu">Dormiu</option>
-      <option value="acordou">Acordou</option>
-    </select>
-    <textarea id="sono"></textarea>
+  <label for="mamada">🍼 Mamada:</label>
+  <textarea id="mamada"></textarea>
 
-    <label>💩 Fezes:</label>
-    <select id="fezesOpcao">
-      <option value="">Selecione o tipo</option>
-      <option value="borrado">Borrado</option>
-      <option value="PQ">PQ</option>
-      <option value="MQ">MQ</option>
-      <option value="GQ">GQ</option>
-      <option value="GGQ">GGQ</option>
-    </select>
-    <textarea id="fezes"></textarea>
+  <label for="vitaminaD">🌞 Vitamina D:</label>
+  <textarea id="vitaminaD"></textarea>
 
-    <label for="urina">💧 Urina:</label>
-    <textarea id="urina"></textarea>
+  <label for="estimulacao">🎯 Estimulação:</label>
+  <textarea id="estimulacao"></textarea>
 
-    <label for="mamada">🍼 Mamada:</label>
-    <textarea id="mamada"></textarea>
+  <button id="salvar">💾 Salvar dados</button>
 
-    <label for="vitaminaD">🌞 Vitamina D:</label>
-    <textarea id="vitaminaD"></textarea>
+  <hr/>
 
-    <label for="estimulacao">🎯 Estimulação:</label>
-    <textarea id="estimulacao"></textarea>
+  <label for="dataConsulta">🔍 Selecionar data:</label>
+  <input type="date" id="dataConsulta" />
+  <button id="carregarBtn">📅 Carregar dados do dia</button>
+  <div id="resultado"></div>
 
-    <button id="salvar">💾 Salvar dados</button>
-
-    <hr/>
-
-    <label for="dataConsulta">🔍 Selecionar data:</label>
-    <input type="date" id="dataConsulta" />
-    <button id="carregarBtn">📅 Carregar dados do dia</button>
-
-    <div id="resultado"></div>
-
-    <button id="gerarPdf">📄 Gerar PDF</button>
-    <button id="compartilhar">📤 Compartilhar no WhatsApp</button>
-    <button id="calcularTotais">🧮 Calcular Totais</button>
-  </div>
+  <button id="gerarPdf">📄 Gerar PDF</button>
+  <button id="compartilhar">📤 Compartilhar no WhatsApp</button>
+  <button id="calcularTotais">📊 Calcular Totais</button>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCjy4XjLQxDx0IyA5MNE6JuNDEDzQR3jeU",
@@ -129,86 +111,55 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase();
-    const auth = getAuth();
 
-    const loginDiv = document.getElementById("login");
-    const appDiv = document.getElementById("app");
-    const email = document.getElementById("email");
-    const senha = document.getElementById("senha");
-    const entrar = document.getElementById("entrar");
-
-    entrar.addEventListener("click", () => {
-      signInWithEmailAndPassword(auth, email.value, senha.value)
-        .then(() => {
-          loginDiv.style.display = "none";
-          appDiv.style.display = "block";
-        })
-        .catch(() => alert("Login falhou"));
-    });
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        loginDiv.style.display = "none";
-        appDiv.style.display = "block";
-
-
-
-      }
-    });
-
+    const dataInput = document.getElementById("data");
     const sonoOpcao = document.getElementById("sonoOpcao");
     const sono = document.getElementById("sono");
+    const fezesOpcao = document.getElementById("fezesOpcao");
+    const fezes = document.getElementById("fezes");
+    const urina = document.getElementById("urina");
+    const mamada = document.getElementById("mamada");
+    const vitaminaD = document.getElementById("vitaminaD");
+    const estimulacao = document.getElementById("estimulacao");
+    const salvarBtn = document.getElementById("salvar");
+    const carregarBtn = document.getElementById("carregarBtn");
+    const dataConsultaInput = document.getElementById("dataConsulta");
+    const resultado = document.getElementById("resultado");
+    const gerarPdfBtn = document.getElementById("gerarPdf");
+    const compartilharBtn = document.getElementById("compartilhar");
+    const calcularTotaisBtn = document.getElementById("calcularTotais");
+
     sonoOpcao.addEventListener("change", () => {
       const opcao = sonoOpcao.value;
       if (opcao) {
-        const hora = prompt(`Qual horário para: ${opcao}? (formato HH:MM)`);
+        const hora = prompt(Qual horário para: ${opcao}? (formato HH:MM));
         if (hora) {
-          const entrada = `${opcao} ${hora}`;
-          sono.value = sono.value ? `${sono.value}; ${entrada}` : entrada;
+          const entrada = ${opcao} ${hora};
+          sono.value = sono.value ? ${sono.value}; ${entrada} : entrada;
         }
         sonoOpcao.value = "";
       }
     });
 
-    const fezesOpcao = document.getElementById("fezesOpcao");
-    const fezes = document.getElementById("fezes");
     fezesOpcao.addEventListener("change", () => {
       const tipo = fezesOpcao.value;
       if (tipo) {
-        const hora = prompt(`Qual horário para: ${tipo}? (formato HH:MM)`);
+        const hora = prompt(Qual horário para: ${tipo}? (formato HH:MM));
         if (hora) {
-          const entrada = `${hora} ${tipo}`;
-          fezes.value = fezes.value ? `${fezes.value}; ${entrada}` : entrada;
+          const entrada = ${hora} ${tipo};
+          fezes.value = fezes.value ? ${fezes.value}; ${entrada} : entrada;
         }
         fezesOpcao.value = "";
       }
     });
 
-    const salvarBtn = document.getElementById("salvar");
-    const dataInput = document.getElementById("data");
-    const urina = document.getElementById("urina");
-    const mamada = document.getElementById("mamada");
-    const vitaminaD = document.getElementById("vitaminaD");
-    const estimulacao = document.getElementById("estimulacao");
-    const resultado = document.getElementById("resultado");
-    const carregarBtn = document.getElementById("carregarBtn");
-    const dataConsultaInput = document.getElementById("dataConsulta");
-    const gerarPdfBtn = document.getElementById("gerarPdf");
-    const compartilharBtn = document.getElementById("compartilhar");
-    const calcularTotaisBtn = document.getElementById("calcularTotais");
-
-    function concat(antigo, novo) {
-      if (!novo.trim()) return antigo || "";
-      if (!antigo) return novo.trim();
-      return antigo.trim() + "; " + novo.trim();
-    }
-
     salvarBtn.addEventListener("click", async () => {
       const dataSelecionada = dataInput.value;
-      if (!/\d{4}-\d{2}-\d{2}/.test(dataSelecionada)) {
+      if (!dataSelecionada) {
         alert("Selecione uma data válida.");
         return;
       }
+
       const diaRef = ref(db, "rotina/" + dataSelecionada);
       const snapshot = await get(diaRef);
       const dadosExistente = snapshot.exists() ? snapshot.val() : {};
@@ -227,29 +178,79 @@
       sono.value = urina.value = fezes.value = mamada.value = vitaminaD.value = estimulacao.value = "";
     });
 
+    function concat(antigo, novo) {
+      if (!novo.trim()) return antigo || "";
+      if (!antigo) return novo.trim();
+      return antigo.trim() + "; " + novo.trim();
+    }
+
     carregarBtn.addEventListener("click", async () => {
       const dataSelecionada = dataConsultaInput.value;
-      if (!/\d{4}-\d{2}-\d{2}/.test(dataSelecionada)) {
+      if (!dataSelecionada) {
         alert("Selecione uma data válida.");
         return;
       }
-
       resultado.innerHTML = "<p>🔄 Carregando...</p>";
       const diaRef = ref(db, "rotina/" + dataSelecionada);
       const snapshot = await get(diaRef);
       if (snapshot.exists()) {
         const dados = snapshot.val();
-        let html = `<h3>Dados de ${dataSelecionada}</h3>`;
-        html += `<p><strong>🛏 Sono:</strong> ${dados.sono || "Sem dados"}</p>`;
-        html += `<p><strong>💧 Urina:</strong> ${dados.urina || "Sem dados"}</p>`;
-        html += `<p><strong>💩 Fezes:</strong> ${dados.fezes || "Sem dados"}</p>`;
-        html += `<p><strong>🍼 Mamada:</strong> ${dados.mamada || "Sem dados"}</p>`;
-        html += `<p><strong>🌞 Vitamina D:</strong> ${dados.vitaminaD || "Sem dados"}</p>`;
-        html += `<p><strong>🎯 Estimulação:</strong> ${dados.estimulacao || "Sem dados"}</p>`;
+        let html = <h3>Dados de ${dataSelecionada}</h3>;
+        html += <p><strong>🛏 Sono:</strong> ${dados.sono || "Sem dados"}</p>;
+        html += <p><strong>💧 Urina:</strong> ${dados.urina || "Sem dados"}</p>;
+        html += <p><strong>💩 Fezes:</strong> ${dados.fezes || "Sem dados"}</p>;
+        html += <p><strong>🍼 Mamada:</strong> ${dados.mamada || "Sem dados"}</p>;
+        html += <p><strong>🌞 Vitamina D:</strong> ${dados.vitaminaD || "Sem dados"}</p>;
+        html += <p><strong>🎯 Estimulação:</strong> ${dados.estimulacao || "Sem dados"}</p>;
         resultado.innerHTML = html;
       } else {
-        resultado.innerHTML = `<p>⚠️ Nenhum dado encontrado para ${dataSelecionada}</p>`;
+        resultado.innerHTML = <p>⚠️ Nenhum dado encontrado para ${dataSelecionada}</p>;
       }
+    });
+
+    calcularTotaisBtn.addEventListener("click", async () => {
+      const dataSelecionada = dataConsultaInput.value;
+      if (!dataSelecionada) {
+        alert("Selecione uma data primeiro para calcular.");
+        return;
+      }
+      const diaRef = ref(db, "rotina/" + dataSelecionada);
+      const snapshot = await get(diaRef);
+      if (!snapshot.exists()) {
+        alert("Nenhum dado encontrado para esse dia.");
+        return;
+      }
+
+      const dados = snapshot.val();
+      const sonoEventos = (dados.sono || "").split(";").map(s => s.trim()).filter(Boolean);
+
+      let totalMin = 0;
+      let dormindo = true;
+      let anterior = "00:00";
+
+      for (const evento of sonoEventos) {
+        const partes = evento.split(" ");
+        if (partes.length !== 2) continue;
+        const [tipo, hora] = partes;
+        const [h, m] = hora.split(":").map(Number);
+        const minutos = h * 60 + m;
+        if (dormindo) {
+          totalMin += minutos - (parseInt(anterior.split(":")[0]) * 60 + parseInt(anterior.split(":")[1]));
+        }
+        anterior = hora;
+        dormindo = tipo === "acordou";
+      }
+      if (!dormindo) {
+        totalMin += 1439 - (parseInt(anterior.split(":")[0]) * 60 + parseInt(anterior.split(":")[1]));
+      }
+
+      const horas = Math.floor(totalMin / 60);
+      const minutos = totalMin % 60;
+
+      const totalUrina = (dados.urina || "").split(";").filter(e => e.trim()).length;
+      const totalFezes = (dados.fezes || "").split(";").filter(e => e.trim()).length;
+
+      alert(Total de sono: ${horas}h ${minutos}min\nUrinas: ${totalUrina}\nFezes: ${totalFezes});
     });
 
     gerarPdfBtn.addEventListener("click", () => {
@@ -261,9 +262,9 @@
       link.click();
     });
 
-    compartilharBtn.addEventListener("click", () => {Add commentMore actions
+    compartilharBtn.addEventListener("click", () => {
       const texto = resultado.innerText;
-      const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;Add commentMore actions
+      const url = https://wa.me/?text=${encodeURIComponent(texto)};
       window.open(url, "_blank");
     });
   </script>
