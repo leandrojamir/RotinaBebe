@@ -1,0 +1,63 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #fff0f5;
+  color: #333;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  color: #d63384;
+}
+
+.grupo {
+  margin-bottom: 15px;
+}
+
+label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+textarea {
+  width: 100%;
+  height: 60px;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  resize: vertical;
+}
+
+select,
+input[type="date"] {
+  width: 100%;
+  padding: 6px;
+  border-radius: 5px;
+  margin-bottom: 8px;
+}
+
+button {
+  background-color: #d63384;
+  color: white;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin-right: 5px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #b82d70;
+}
+
+#resultado {
+  margin-top: 20px;
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
