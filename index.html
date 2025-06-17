@@ -47,70 +47,58 @@
   </style>
 </head>
 <body>
+
   <h1>Rotina da Princesa 👶💖</h1>
 
-  <div id="login">
-    <label for="email">📧 Email:</label>
-    <input type="email" id="email" />
-    <label for="senha">🔒 Senha:</label>
-    <input type="password" id="senha" />
-    <button id="entrar">🔓 Entrar</button>
-  </div>
+  <label for="data">📅 Data:</label>
+  <input type="date" id="data" required />
 
-  <div id="app" style="display:none;">
-    <label for="data">📅 Data:</label>
-    <input type="date" id="data" required />
+  <label>🛏 Sono:</label>
+  <select id="sonoOpcao">
+    <option value="">Selecione uma opção</option>
+    <option value="dormiu">Dormiu</option>
+    <option value="acordou">Acordou</option>
+  </select>
+  <textarea id="sono"></textarea>
 
-    <label>🛏 Sono:</label>
-    <select id="sonoOpcao">
-      <option value="">Selecione uma opção</option>
-      <option value="dormiu">Dormiu</option>
-      <option value="acordou">Acordou</option>
-    </select>
-    <textarea id="sono"></textarea>
+  <label>💩 Fezes:</label>
+  <select id="fezesOpcao">
+    <option value="">Selecione o tipo</option>
+    <option value="PQ">PQ</option>
+    <option value="MQ">MQ</option>
+    <option value="GQ">GQ</option>
+    <option value="GGQ">GGQ</option>
+  </select>
+  <textarea id="fezes"></textarea>
 
-    <label>💩 Fezes:</label>
-    <select id="fezesOpcao">
-      <option value="">Selecione o tipo</option>
-      <option value="borrado">Borrado</option>
-      <option value="PQ">PQ</option>
-      <option value="MQ">MQ</option>
-      <option value="GQ">GQ</option>
-      <option value="GGQ">GGQ</option>
-    </select>
-    <textarea id="fezes"></textarea>
+  <label for="urina">💧 Urina:</label>
+  <textarea id="urina"></textarea>
 
-    <label for="urina">💧 Urina:</label>
-    <textarea id="urina"></textarea>
+  <label for="mamada">🍼 Mamada:</label>
+  <textarea id="mamada"></textarea>
 
-    <label for="mamada">🍼 Mamada:</label>
-    <textarea id="mamada"></textarea>
+  <label for="vitaminaD">🌞 Vitamina D:</label>
+  <textarea id="vitaminaD"></textarea>
 
-    <label for="vitaminaD">🌞 Vitamina D:</label>
-    <textarea id="vitaminaD"></textarea>
+  <label for="estimulacao">🎯 Estimulação:</label>
+  <textarea id="estimulacao"></textarea>
 
-    <label for="estimulacao">🎯 Estimulação:</label>
-    <textarea id="estimulacao"></textarea>
+  <button id="salvar">💾 Salvar dados</button>
 
-    <button id="salvar">💾 Salvar dados</button>
+  <hr/>
 
-    <hr/>
+  <label for="dataConsulta">🔍 Selecionar data:</label>
+  <input type="date" id="dataConsulta" />
+  <button id="carregarBtn">📅 Carregar dados do dia</button>
 
-    <label for="dataConsulta">🔍 Selecionar data:</label>
-    <input type="date" id="dataConsulta" />
-    <button id="carregarBtn">📅 Carregar dados do dia</button>
+  <div id="resultado"></div>
 
-    <div id="resultado"></div>
-
-    <button id="gerarPdf">📄 Gerar PDF</button>
-    <button id="compartilhar">📤 Compartilhar no WhatsApp</button>
-    <button id="calcularTotais">🧮 Calcular Totais</button>
-  </div>
+  <button id="gerarPdf">📄 Gerar PDF</button>
+  <button id="compartilhar">📤 Compartilhar no WhatsApp</button>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCjy4XjLQxDx0IyA5MNE6JuNDEDzQR3jeU",
@@ -123,32 +111,23 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase();
-    const auth = getAuth();
 
-    const loginDiv = document.getElementById("login");
-    const appDiv = document.getElementById("app");
-    const email = document.getElementById("email");
-    const senha = document.getElementById("senha");
-    const entrar = document.getElementById("entrar");
-
-    entrar.addEventListener("click", () => {
-      signInWithEmailAndPassword(auth, email.value, senha.value)
-        .then(() => {
-          loginDiv.style.display = "none";
-          appDiv.style.display = "block";
-        })
-        .catch(() => alert("Login falhou"));
-    });
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        loginDiv.style.display = "none";
-        appDiv.style.display = "block";
-      }
-    });
-
+    const salvarBtn = document.getElementById("salvar");
+    const dataInput = document.getElementById("data");
     const sonoOpcao = document.getElementById("sonoOpcao");
     const sono = document.getElementById("sono");
+    const urina = document.getElementById("urina");
+    const fezes = document.getElementById("fezes");
+    const fezesOpcao = document.getElementById("fezesOpcao");
+    const mamada = document.getElementById("mamada");
+    const vitaminaD = document.getElementById("vitaminaD");
+    const estimulacao = document.getElementById("estimulacao");
+    const resultado = document.getElementById("resultado");
+    const carregarBtn = document.getElementById("carregarBtn");
+    const dataConsultaInput = document.getElementById("dataConsulta");
+    const gerarPdfBtn = document.getElementById("gerarPdf");
+    const compartilharBtn = document.getElementById("compartilhar");
+
     sonoOpcao.addEventListener("change", () => {
       const opcao = sonoOpcao.value;
       if (opcao) {
@@ -161,8 +140,6 @@
       }
     });
 
-    const fezesOpcao = document.getElementById("fezesOpcao");
-    const fezes = document.getElementById("fezes");
     fezesOpcao.addEventListener("change", () => {
       const tipo = fezesOpcao.value;
       if (tipo) {
@@ -175,31 +152,13 @@
       }
     });
 
-    const salvarBtn = document.getElementById("salvar");
-    const dataInput = document.getElementById("data");
-    const urina = document.getElementById("urina");
-    const mamada = document.getElementById("mamada");
-    const vitaminaD = document.getElementById("vitaminaD");
-    const estimulacao = document.getElementById("estimulacao");
-    const resultado = document.getElementById("resultado");
-    const carregarBtn = document.getElementById("carregarBtn");
-    const dataConsultaInput = document.getElementById("dataConsulta");
-    const gerarPdfBtn = document.getElementById("gerarPdf");
-    const compartilharBtn = document.getElementById("compartilhar");
-    const calcularTotaisBtn = document.getElementById("calcularTotais");
-
-    function concat(antigo, novo) {
-      if (!novo.trim()) return antigo || "";
-      if (!antigo) return novo.trim();
-      return antigo.trim() + "; " + novo.trim();
-    }
-
     salvarBtn.addEventListener("click", async () => {
       const dataSelecionada = dataInput.value;
       if (!/\d{4}-\d{2}-\d{2}/.test(dataSelecionada)) {
         alert("Selecione uma data válida.");
         return;
       }
+
       const diaRef = ref(db, "rotina/" + dataSelecionada);
       const snapshot = await get(diaRef);
       const dadosExistente = snapshot.exists() ? snapshot.val() : {};
@@ -218,6 +177,12 @@
       sono.value = urina.value = fezes.value = mamada.value = vitaminaD.value = estimulacao.value = "";
     });
 
+    function concat(antigo, novo) {
+      if (!novo.trim()) return antigo || "";
+      if (!antigo) return novo.trim();
+      return antigo.trim() + "; " + novo.trim();
+    }
+
     carregarBtn.addEventListener("click", async () => {
       const dataSelecionada = dataConsultaInput.value;
       if (!/\d{4}-\d{2}-\d{2}/.test(dataSelecionada)) {
@@ -226,20 +191,25 @@
       }
 
       resultado.innerHTML = "<p>🔄 Carregando...</p>";
-      const diaRef = ref(db, "rotina/" + dataSelecionada);
-      const snapshot = await get(diaRef);
-      if (snapshot.exists()) {
-        const dados = snapshot.val();
-        let html = `<h3>Dados de ${dataSelecionada}</h3>`;
-        html += `<p><strong>🛏 Sono:</strong> ${dados.sono || "Sem dados"}</p>`;
-        html += `<p><strong>💧 Urina:</strong> ${dados.urina || "Sem dados"}</p>`;
-        html += `<p><strong>💩 Fezes:</strong> ${dados.fezes || "Sem dados"}</p>`;
-        html += `<p><strong>🍼 Mamada:</strong> ${dados.mamada || "Sem dados"}</p>`;
-        html += `<p><strong>🌞 Vitamina D:</strong> ${dados.vitaminaD || "Sem dados"}</p>`;
-        html += `<p><strong>🎯 Estimulação:</strong> ${dados.estimulacao || "Sem dados"}</p>`;
-        resultado.innerHTML = html;
-      } else {
-        resultado.innerHTML = `<p>⚠️ Nenhum dado encontrado para ${dataSelecionada}</p>`;
+
+      try {
+        const diaRef = ref(db, "rotina/" + dataSelecionada);
+        const snapshot = await get(diaRef);
+        if (snapshot.exists()) {
+          const dados = snapshot.val();
+          let html = `<h3>Dados de ${dataSelecionada}</h3>`;
+          html += `<p><strong>🛏 Sono:</strong> ${dados.sono || "Sem dados"}</p>`;
+          html += `<p><strong>💧 Urina:</strong> ${dados.urina || "Sem dados"}</p>`;
+          html += `<p><strong>💩 Fezes:</strong> ${dados.fezes || "Sem dados"}</p>`;
+          html += `<p><strong>🍼 Mamada:</strong> ${dados.mamada || "Sem dados"}</p>`;
+          html += `<p><strong>🌞 Vitamina D:</strong> ${dados.vitaminaD || "Sem dados"}</p>`;
+          html += `<p><strong>🎯 Estimulação:</strong> ${dados.estimulacao || "Sem dados"}</p>`;
+          resultado.innerHTML = html;
+        } else {
+          resultado.innerHTML = `<p>⚠️ Nenhum dado encontrado para ${dataSelecionada}</p>`;
+        }
+      } catch (e) {
+        resultado.innerHTML = `<p>Erro ao carregar dados.</p>`;
       }
     });
 
@@ -256,6 +226,62 @@
       const texto = resultado.innerText;
       const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
       window.open(url, "_blank");
+    });
+
+    const calcularTotaisBtn = document.createElement("button");
+    calcularTotaisBtn.textContent = "📊 Calcular Totais";
+    calcularTotaisBtn.style.marginTop = "10px";
+    resultado.parentNode.insertBefore(calcularTotaisBtn, gerarPdfBtn);
+
+    calcularTotaisBtn.addEventListener("click", () => {
+      const texto = resultado.innerText;
+      if (!texto || texto.includes("Nenhum dado encontrado")) {
+        alert("Carregue os dados de um dia antes de calcular os totais.");
+        return;
+      }
+
+      const sonoTexto = texto.match(/🛏 Sono:\s(.*)/)?.[1] || "";
+      const urinaTexto = texto.match(/💧 Urina:\s(.*)/)?.[1] || "";
+      const fezesTexto = texto.match(/💩 Fezes:\s(.*)/)?.[1] || "";
+
+      function toMinutes(hora) {
+        const [h, m] = hora.split(":" ).map(Number);
+        return h * 60 + m;
+      }
+
+      const partes = sonoTexto.split(";").map(s => s.trim());
+      let minutos = 0;
+      let dormindo = true;
+      let ultimoHorario = 0;
+      ultimoHorario = 0;
+
+      for (let parte of partes) {
+        const match = parte.match(/(acordou|dormiu) (\d{2}:\d{2})/);
+        if (match) {
+          const [, tipo, hora] = match;
+          const atual = toMinutes(hora);
+
+          if (tipo === "acordou" && dormindo) {
+            minutos += atual - ultimoHorario;
+            dormindo = false;
+          } else if (tipo === "dormiu") {
+            ultimoHorario = atual;
+            dormindo = true;
+          }
+        }
+      }
+
+      if (dormindo) {
+        minutos += 1439 - ultimoHorario;
+      }
+
+      const horas = Math.floor(minutos / 60);
+      const min = minutos % 60;
+
+      const urinaQtd = urinaTexto ? urinaTexto.split(";").length : 0;
+      const fezesQtd = fezesTexto ? fezesTexto.split(";").length : 0;
+
+      alert(`🛏 Total de sono: ${horas}h ${min}min\n💧 Urinas: ${urinaQtd}\n💩 Fezes: ${fezesQtd}`);
     });
   </script>
 </body>
