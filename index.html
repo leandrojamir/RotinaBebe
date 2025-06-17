@@ -44,62 +44,76 @@
       border-radius: 6px;
       box-shadow: 0 0 5px #ccc;
     }
+    #login {
+      display: none;
+    }
   </style>
 </head>
 <body>
 
   <h1>Rotina da Princesa 👶💖</h1>
 
-  <label for="data">📅 Data:</label>
-  <input type="date" id="data" required />
+  <div id="login">
+    <label for="email">Email:</label>
+    <input type="email" id="email">
 
-  <label>🛏 Sono:</label>
-  <select id="sonoOpcao">
-    <option value="">Selecione uma opção</option>
-    <option value="dormiu">Dormiu</option>
-    <option value="acordou">Acordou</option>
-  </select>
-  <textarea id="sono"></textarea>
+    <label for="senha">Senha:</label>
+    <input type="password" id="senha">
 
-  <label>💩 Fezes:</label>
-  <select id="fezesOpcao">
-    <option value="">Selecione o tipo</option>
-    <option value="PQ">PQ</option>
-    <option value="MQ">MQ</option>
-    <option value="GQ">GQ</option>
-    <option value="GGQ">GGQ</option>
-  </select>
-  <textarea id="fezes"></textarea>
+    <button id="entrar">Entrar</button>
+  </div>
 
-  <label for="urina">💧 Urina:</label>
-  <textarea id="urina"></textarea>
+  <div id="app" style="display:none;">
+    <label for="data">📅 Data:</label>
+    <input type="date" id="data" required />
 
-  <label for="mamada">🍼 Mamada:</label>
-  <textarea id="mamada"></textarea>
+    <label>🛏 Sono:</label>
+    <select id="sonoOpcao">
+      <option value="">Selecione uma opção</option>
+      <option value="dormiu">Dormiu</option>
+      <option value="acordou">Acordou</option>
+    </select>
+    <textarea id="sono"></textarea>
 
-  <label for="vitaminaD">🌞 Vitamina D:</label>
-  <textarea id="vitaminaD"></textarea>
+    <label>💩 Fezes:</label>
+    <select id="fezesOpcao">
+      <option value="">Selecione o tipo</option>
+      <option value="PQ">PQ</option>
+      <option value="MQ">MQ</option>
+      <option value="GQ">GQ</option>
+      <option value="GGQ">GGQ</option>
+    </select>
+    <textarea id="fezes"></textarea>
 
-  <label for="estimulacao">🎯 Estimulação:</label>
-  <textarea id="estimulacao"></textarea>
+    <label for="urina">💧 Urina:</label>
+    <textarea id="urina"></textarea>
 
-  <button id="salvar">💾 Salvar dados</button>
+    <label for="mamada">🍼 Mamada:</label>
+    <textarea id="mamada"></textarea>
 
-  <hr/>
+    <label for="vitaminaD">🌞 Vitamina D:</label>
+    <textarea id="vitaminaD"></textarea>
 
-  <label for="dataConsulta">🔍 Selecionar data:</label>
-  <input type="date" id="dataConsulta" />
-  <button id="carregarBtn">📅 Carregar dados do dia</button>
-  <div id="resultado"></div>
+    <label for="estimulacao">🎯 Estimulação:</label>
+    <textarea id="estimulacao"></textarea>
 
-  <button id="gerarPdf">📄 Gerar PDF</button>
-  <button id="compartilhar">📤 Compartilhar no WhatsApp</button>
-  <button id="calcularTotais">📊 Calcular Totais</button>
+    <button id="salvar">💾 Salvar dados</button>
+    <hr/>
+
+    <label for="dataConsulta">🔍 Selecionar data:</label>
+    <input type="date" id="dataConsulta" />
+    <button id="carregarBtn">📅 Carregar dados do dia</button>
+
+    <div id="resultado"></div>
+
+    <button id="gerarPdf">📄 Gerar PDF</button>
+    <button id="compartilhar">📤 Compartilhar no WhatsApp</button>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCjy4XjLQxDx0IyA5MNE6JuNDEDzQR3jeU",
@@ -111,33 +125,32 @@
     };
 
     const app = initializeApp(firebaseConfig);
+    const db = getDatabase();
     const auth = getAuth(app);
-    const db = getDatabase(app);
 
-    // Autenticação anônima
-    signInAnonymously(auth).catch((error) => {
-      console.error("Erro na autenticação anônima:", error);
-      alert("Erro ao autenticar no Firebase. Confira o console.");
+    const loginDiv = document.getElementById("login");
+    const appDiv = document.getElementById("app");
+    const entrarBtn = document.getElementById("entrar");
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loginDiv.style.display = "none";
+        appDiv.style.display = "block";
+      } else {
+        loginDiv.style.display = "block";
+        appDiv.style.display = "none";
+      }
     });
 
-    // Só permitir usar a aplicação após autenticação anônima
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        alert("Usuário não autenticado.");
-        return;
+    entrarBtn.addEventListener("click", async () => {
+      const email = document.getElementById("email").value;
+      const senha = document.getElementById("senha").value;
+      try {
+        await signInWithEmailAndPassword(auth, email, senha);
+      } catch (e) {
+        alert("Erro no login: " + e.message);
       }
-
-      // Aqui fica todo o código que depende do usuário estar autenticado
-
-      const dataInput = document.getElementById("data");
-      const sonoOpcao = document.getElementById("sonoOpcao");
-      const sono = document.getElementById("sono");
-      const fezesOpcao = document.getElementById("fezesOpcao");
-      const fezes = document.getElementById("fezes");
-      const urina = document.getElementById("urina");
-      const mamada = document.getElementById("mamada");
-      const vitaminaD = document.getElementById("vitaminaD");
-      const estimulacao = document.getElementById("estimulacao");
-      const salvarBtn = document.getElementById("salvar");
-      const carregarBtn = document.getElementById("carregarBtn");
-      const dataConsultaInput = document.getElementById("dataConsult
+    });
+  </script>
+</body>
+</html>
