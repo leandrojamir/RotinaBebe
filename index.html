@@ -3,58 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Rotina da Princesa 👑</title>
+  <title>Rotina da Princesa 👶</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Rotina da Princesa 👶💖</h1>
+  <h1>🌸 Rotina da Princesa 🌸</h1>
 
-  <label for="data">📅 Data:</label>
-  <input type="date" id="data" required />
+  <label>Data para salvar: <input type="date" id="data" /></label>
 
-  <label>🛏 Sono:</label>
-  <select id="sonoOpcao">
-    <option value="">Selecione uma opção</option>
-    <option value="dormiu">Dormiu</option>
-    <option value="acordou">Acordou</option>
-  </select>
-  <textarea id="sono"></textarea>
+  <div class="grupo">
+    <label>🛏 Sono:</label>
+    <select id="sonoOpcao">
+      <option value="">Adicionar horário</option>
+      <option value="acordou">Acordou</option>
+      <option value="dormiu">Dormiu</option>
+    </select>
+    <textarea id="sono" placeholder="Registros de sono..."></textarea>
+  </div>
 
-  <label>💩 Fezes:</label>
-  <select id="fezesOpcao">
-    <option value="">Selecione o tipo</option>
-    <option value="PQ">PQ</option>
-    <option value="MQ">MQ</option>
-    <option value="GQ">GQ</option>
-    <option value="GGQ">GGQ</option>
-  </select>
-  <textarea id="fezes"></textarea>
+  <div class="grupo">
+    <label>💧 Urina:</label>
+    <textarea id="urina" placeholder="Quantas vezes urinou..."></textarea>
+  </div>
 
-  <label for="urina">💧 Urina:</label>
-  <textarea id="urina"></textarea>
-
-  <label for="mamada">🍼 Mamada:</label>
-  <textarea id="mamada"></textarea>
-
-  <label for="vitaminaD">🌞 Vitamina D:</label>
-  <textarea id="vitaminaD"></textarea>
-
-  <label for="estimulacao">🎯 Estimulação:</label>
-  <textarea id="estimulacao"></textarea>
-
-  <button id="salvar">💾 Salvar dados</button>
-
-  <hr/>
-
-  <label for="dataConsulta">🔍 Selecionar data:</label>
-  <input type="date" id="dataConsulta" />
-  <button id="carregarBtn">📅 Carregar dados do dia</button>
-  <div id="resultado"></div>
-
-  <button id="gerarPdf">📄 Gerar PDF</button>
-  <button id="compartilhar">📤 Compartilhar no WhatsApp</button>
-  <button id="calcularTotais">🧮 Calcular totais</button>
-
-  <script type="module" src="main.js"></script>
-</body>
-</html>
+  <div class="grupo">
+    <label>💩 Fezes:</label>
+    <select id="fezesOpcao">
+      <option value="">Adicionar horário</option>
+      <option value="PQ">PQ</option>
+      <option value="MQ">M
