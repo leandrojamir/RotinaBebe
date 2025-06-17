@@ -64,8 +64,9 @@
   <label>💩 Fezes:</label>
   <select id="fezesOpcao">
     <option value="">Selecione o tipo</option>
-    <option value="PQ">PQ</option>
+    <option value="borrado">Borrado</option>
     <option value="MQ">MQ</option>
+    <option value="PQ">PQ</option>
     <option value="GQ">GQ</option>
     <option value="GGQ">GGQ</option>
   </select>
@@ -84,6 +85,7 @@
   <textarea id="estimulacao"></textarea>
 
   <button id="salvar">💾 Salvar dados</button>
+  <button id="calcularTotais">📊 Calcular Totais</button>
 
   <hr/>
 
@@ -127,6 +129,7 @@
     const dataConsultaInput = document.getElementById("dataConsulta");
     const gerarPdfBtn = document.getElementById("gerarPdf");
     const compartilharBtn = document.getElementById("compartilhar");
+    const calcularTotaisBtn = document.getElementById("calcularTotais");
 
     sonoOpcao.addEventListener("change", () => {
       const opcao = sonoOpcao.value;
@@ -154,7 +157,7 @@
 
     salvarBtn.addEventListener("click", async () => {
       const dataSelecionada = dataInput.value;
-      if (!/\d{4}-\d{2}-\d{2}/.test(dataSelecionada)) {
+      if (!dataSelecionada) {
         alert("Selecione uma data válida.");
         return;
       }
@@ -177,41 +180,74 @@
       sono.value = urina.value = fezes.value = mamada.value = vitaminaD.value = estimulacao.value = "";
     });
 
+    carregarBtn.addEventListener("click", async () => {
+      const dataSelecionada = dataConsultaInput.value;
+      if (!dataSelecionada) {
+        alert("Selecione uma data válida.");
+        return;
+      }
+
+      resultado.innerHTML = "<p>🔄 Carregando...</p>";
+      const diaRef = ref(db, "rotina/" + dataSelecionada);
+      const snapshot = await get(diaRef);
+
+      if (snapshot.exists()) {
+        const dados = snapshot.val();
+        let html = `<h3>Dados de ${dataSelecionada}</h3>`;
+        html += `<p><strong>🛏 Sono:</strong> ${dados.sono || "Sem dados"}</p>`;
+        html += `<p><strong>💧 Urina:</strong> ${dados.urina || "Sem dados"}</p>`;
+        html += `<p><strong>💩 Fezes:</strong> ${dados.fezes || "Sem dados"}</p>`;
+        html += `<p><strong>🍼 Mamada:</strong> ${dados.mamada || "Sem dados"}</p>`;
+        html += `<p><strong>🌞 Vitamina D:</strong> ${dados.vitaminaD || "Sem dados"}</p>`;
+        html += `<p><strong>🎯 Estimulação:</strong> ${dados.estimulacao || "Sem dados"}</p>`;
+        resultado.innerHTML = html;
+      } else {
+        resultado.innerHTML = `<p>⚠️ Nenhum dado encontrado para ${dataSelecionada}</p>`;
+      }
+    });
+
     function concat(antigo, novo) {
       if (!novo.trim()) return antigo || "";
       if (!antigo) return novo.trim();
       return antigo.trim() + "; " + novo.trim();
     }
 
-    carregarBtn.addEventListener("click", async () => {
-      const dataSelecionada = dataConsultaInput.value;
-      if (!/\d{4}-\d{2}-\d{2}/.test(dataSelecionada)) {
-        alert("Selecione uma data válida.");
-        return;
-      }
+    calcularTotaisBtn.addEventListener("click", () => {
+      const sonoTexto = resultado.innerHTML.match(/<strong>🛏 Sono:<\/strong> (.*?)<\/p>/);
+      const urinaTexto = resultado.innerHTML.match(/<strong>💧 Urina:<\/strong> (.*?)<\/p>/);
+      const fezesTexto = resultado.innerHTML.match(/<strong>💩 Fezes:<\/strong> (.*?)<\/p>/);
 
-      resultado.innerHTML = "<p>🔄 Carregando...</p>";
+      const sonoTotal = calcularHorasSono(sonoTexto ? sonoTexto[1] : "");
+      const urinaQtd = (urinaTexto && urinaTexto[1].trim()) ? urinaTexto[1].split(';').length : 0;
+      const fezesQtd = (fezesTexto && fezesTexto[1].trim()) ? fezesTexto[1].split(';').length : 0;
 
-      try {
-        const diaRef = ref(db, "rotina/" + dataSelecionada);
-        const snapshot = await get(diaRef);
-        if (snapshot.exists()) {
-          const dados = snapshot.val();
-          let html = `<h3>Dados de ${dataSelecionada}</h3>`;
-          html += `<p><strong>🛏 Sono:</strong> ${dados.sono || "Sem dados"}</p>`;
-          html += `<p><strong>💧 Urina:</strong> ${dados.urina || "Sem dados"}</p>`;
-          html += `<p><strong>💩 Fezes:</strong> ${dados.fezes || "Sem dados"}</p>`;
-          html += `<p><strong>🍼 Mamada:</strong> ${dados.mamada || "Sem dados"}</p>`;
-          html += `<p><strong>🌞 Vitamina D:</strong> ${dados.vitaminaD || "Sem dados"}</p>`;
-          html += `<p><strong>🎯 Estimulação:</strong> ${dados.estimulacao || "Sem dados"}</p>`;
-          resultado.innerHTML = html;
-        } else {
-          resultado.innerHTML = `<p>⚠️ Nenhum dado encontrado para ${dataSelecionada}</p>`;
-        }
-      } catch (e) {
-        resultado.innerHTML = `<p>Erro ao carregar dados.</p>`;
-      }
+      alert(`Total de sono: ${sonoTotal}\nUrinas: ${urinaQtd}\nFezes: ${fezesQtd}`);
     });
+
+    function calcularHorasSono(texto) {
+      const eventos = texto.split(';').map(e => e.trim()).filter(e => e);
+      let totalMin = 0;
+      let dormindo = true;
+      let inicio = 0;
+
+      eventos.unshift("dormiu 00:00");
+
+      for (const evento of eventos) {
+        const [tipo, hora] = evento.split(' ');
+        const [h, m] = hora.split(':').map(Number);
+        const minutos = h * 60 + m;
+
+        if (tipo === 'dormiu') {
+          inicio = minutos;
+        } else if (tipo === 'acordou') {
+          totalMin += minutos - inicio;
+        }
+      }
+
+      const horas = Math.floor(totalMin / 60);
+      const minutos = totalMin % 60;
+      return `${horas}h ${minutos}min`;
+    }
 
     gerarPdfBtn.addEventListener("click", () => {
       const texto = resultado.innerText;
@@ -226,62 +262,6 @@
       const texto = resultado.innerText;
       const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
       window.open(url, "_blank");
-    });
-
-    const calcularTotaisBtn = document.createElement("button");
-    calcularTotaisBtn.textContent = "📊 Calcular Totais";
-    calcularTotaisBtn.style.marginTop = "10px";
-    resultado.parentNode.insertBefore(calcularTotaisBtn, gerarPdfBtn);
-
-    calcularTotaisBtn.addEventListener("click", () => {
-      const texto = resultado.innerText;
-      if (!texto || texto.includes("Nenhum dado encontrado")) {
-        alert("Carregue os dados de um dia antes de calcular os totais.");
-        return;
-      }
-
-      const sonoTexto = texto.match(/🛏 Sono:\s(.*)/)?.[1] || "";
-      const urinaTexto = texto.match(/💧 Urina:\s(.*)/)?.[1] || "";
-      const fezesTexto = texto.match(/💩 Fezes:\s(.*)/)?.[1] || "";
-
-      function toMinutes(hora) {
-        const [h, m] = hora.split(":" ).map(Number);
-        return h * 60 + m;
-      }
-
-      const partes = sonoTexto.split(";").map(s => s.trim());
-      let minutos = 0;
-      let dormindo = true;
-      let ultimoHorario = 0;
-      ultimoHorario = 0;
-
-      for (let parte of partes) {
-        const match = parte.match(/(acordou|dormiu) (\d{2}:\d{2})/);
-        if (match) {
-          const [, tipo, hora] = match;
-          const atual = toMinutes(hora);
-
-          if (tipo === "acordou" && dormindo) {
-            minutos += atual - ultimoHorario;
-            dormindo = false;
-          } else if (tipo === "dormiu") {
-            ultimoHorario = atual;
-            dormindo = true;
-          }
-        }
-      }
-
-      if (dormindo) {
-        minutos += 1439 - ultimoHorario;
-      }
-
-      const horas = Math.floor(minutos / 60);
-      const min = minutos % 60;
-
-      const urinaQtd = urinaTexto ? urinaTexto.split(";").length : 0;
-      const fezesQtd = fezesTexto ? fezesTexto.split(";").length : 0;
-
-      alert(`🛏 Total de sono: ${horas}h ${min}min\n💧 Urinas: ${urinaQtd}\n💩 Fezes: ${fezesQtd}`);
     });
   </script>
 </body>
